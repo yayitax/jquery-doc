@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <style>
+        a.test {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="http://jquery.com/">jQuery</a>
+    <button class="alert">Click me!</button>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas exercitationem rem laboriosam voluptatibus dolorum! Voluptas ratione, assumenda reprehenderit quidem vero suscipit modi repudiandae debitis commodi expedita maiores, atque distinctio quo.</p>
+
+    <ul>
+        <li id="menu"></li>
+        <li id="menu"></li>
+        <li id="menu"></li>
+        <li id="menu"></li>
+    </ul>
+
+
+    <button id="helloBtn">Say hello</button>
+
+    <div id="container">
+        <ul id="list">
+            <li><a href="http://domain1.com">Item #1</a></li>
+            <li><a href="/local/path/1">Item #2</a></li>
+            <li><a href="/local/path/2">Item #3</a></li>
+            <li><a href="http://domain4.com">Item #4</a></li>
+        </ul>
+    </div>
+
+    <div class="room" id="kitchen">
+        <div class="lightbulb on"></div>
+        <div class="switch"></div>
+        <div class="switch"></div>
+        <div class="clapper"></div>
+    </div>
+    <div class="room" id="bedroom">
+        <div class="lightbulb on"></div>
+        <div class="switch"></div>
+        <div class="switch"></div>
+        <div class="clapper"></div>
+    </div>
+    <div id="master_switch"></div>
+
+    <script src="jquery.js"></script>
+    <script>
+        $(document).ready(function() {
+
+            // Sets up click behavior on all button elements with the alert class
+            // that exist in the DOM when the instruction was executed
+            $("button.alert").on("click", function() {
+                console.log("A button with the alert class was clicked!");
+            });
+
+            // Now create a new button element with the alert class. This button
+            // was created after the click listeners were applied above, so it
+            // will not have the same click behavior as its peers
+            $("<button class='alert'>Alert!</button>").appendTo(document.body);
+        });
+
+        $("p").on({
+            "click": function() {
+                console.log("clicked!");
+            },
+            "mouseover": function() {
+                console.log("hovered!");
+            }
+        });
+
+        // Tearing down a particular click handler, using a reference to the function
+        var foo = function() {
+            console.log("foo");
+        };
+        var bar = function() {
+            console.log("bar");
+        };
+
+        $("p").on("click", foo).on("click", bar);
+        $("p").off("click", bar); // foo is still bound to the click event
+
+        // Switching handlers using the `.one()` method
+        $("p").one("click", firstClick);
+
+        function firstClick() {
+            console.log("You just clicked this for the first time!");
+
+            // Now set up the new handler for subsequent clicks;
+            // omit this step if no further click responses are needed
+            $(this).click(function() {
+                console.log("You have clicked this before!");
+            });
+        }
+
+        // The hover helper function
+        $("#menu li").hover(function() {
+            $(this).toggleClass("hover");
+        });
+
+        // Event binding using addEventListener
+        var helloBtn = document.getElementById("helloBtn");
+
+        helloBtn.addEventListener("click", function(event) {
+            alert("Hello.");
+        }, false);
+
+        // Event binding using a convenience method
+        $("#helloBtn").click(function(event) {
+            alert("Hello.");
+        })
+
+        // The many ways to bind events with jQuery
+        // Attach an event handler directly to the button using jQuery's
+        // shorthand `click` method.
+        $("#helloBtn").click(function(event) {
+            alert("Hello.");
+        });
+
+        // Attach an event handler directly to the button using jQuery's
+        // `bind` method, passing it an event string of `click`
+        $("#helloBtn").bind("click", function(event) {
+            alert("Hello.");
+        });
+
+        // As of jQuery 1.7, attach an event handler directly to the button
+        // using jQuery's `on` method.
+        $("#helloBtn").on("click", function(event) {
+            alert("Hello.");
+        });
+
+        // As of jQuery 1.7, attach an event handler to the `body` element that
+        // is listening for clicks, and will respond whenever *any* button is
+        // clicked on the page.
+        $("body").on({
+            click: function(event) {
+                alert("Hello.");
+            }
+        }, "button");
+
+        // An alternative to the previous example, using slightly different syntax.
+        $("body").on("click", "button", function(event) {
+            alert("Hello.");
+        });
+
+        // Preventing a link from being followed
+        $("a").click(function(event) {
+            var elem = $(this);
+            if (elem.attr("href").match("evil")) {
+                event.preventDefault();
+                elem.addClass("evil");
+            }
+        });
+    </script>
+
+    <script>
+        // Attach a directly bound event handler
+        $("#list a").on("click", function(event) {
+            event.preventDefault();
+            console.log($(this).text());
+        });
+
+        // Add a new element on to our existing list
+        $("#list").append("<li><a href='http://newdomain.com'>Item #5</a></li>");
+
+        // Attach a delegated event handler
+        $("#list").on("click", "a", function(event) {
+            event.preventDefault();
+            console.log($(this).text());
+        });
+
+        // Attach a delegated event handler
+        $("#list").on("click", "a", function(event) {
+            var elem = $(this);
+            if (elem.is("[href^='http']")) {
+                elem.attr("target", "_blank");
+            }
+        });
+
+        // Attach a delegated event handler with a more refined selector
+        $("#list").on("click", "a[href^='http']", function(event) {
+            $(this).attr("target", "_blank");
+        });
+
+        // Triggering a native browser event using the simulate plugin
+        $("a").simulate("click");
+
+        // Triggering an event handler the right way
+        var foo = function(event) {
+            if (event) {
+                console.log(event);
+            } else {
+                console.log("this didn't come from an event!");
+            }
+        };
+
+        $("p").on("click", foo);
+
+        foo(); // instead of $( "p" ).trigger( "click" )
+    </script>
+
+    <script>
+        //Custom events
+        $(".lightbulb").on("light:toggle", function(event) {
+            var light = $(this);
+            if (light.is(".on")) {
+                light.removeClass("on").addClass("off");
+            } else {
+                light.removeClass("off").addClass("on");
+            }
+        });
+
+        $(".switch, .clapper").click(function() {
+            var room = $(this).closest(".room");
+            room.find(".lightbulb").trigger("light:toggle");
+        });
+
+        $("#master_switch").click(function() {
+            var lightbulbs = $(".lightbulb");
+
+            // Check if any lightbulbs are on
+            if (lightbulbs.is(".on")) {
+                lightbulbs.trigger("light:off");
+            } else {
+                lightbulbs.trigger("light:on");
+            }
+        });
+    </script>
+</body>
+
+</html>
